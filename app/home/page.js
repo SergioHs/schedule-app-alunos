@@ -18,7 +18,7 @@ export default function Home(){
 
     return(
         <div className='min-h-screen p-6'>
-            <h1 className='text-3xl mb-6'>Minhas Tarefas Diárias</h1>
+            <h1 className='text-3xl mb-6'>Dashborad - Minhas Tarefas Diárias</h1>
             <form onSubmit={handleAddTask} className='mb-6'>
                 <input
                     type='text'
