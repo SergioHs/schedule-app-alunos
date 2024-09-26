@@ -3,7 +3,7 @@
 import PrivateRoute from '@/components/PrivateRoute';
 import { useState, useEffect } from 'react';
 import { format, parseISO, setDate } from 'date-fns';
-import { addTaskToFirestore, getTasksFromFirestore } from '../../public/utils/firebase';
+import { addTaskToFirestore, AnalyticsInit, getTasksFromFirestore } from '../../public/utils/firebase';
 import { addTask, getTasks } from '../../public/utils/indexedDb';
 
 const requestNotificationPermission = () => {
@@ -71,31 +71,6 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    requestNotificationPermission();
-    loadTasks();
-
-    const handleOfflineStatus = () => {
-      if (!navigator.onLine) {
-        setIsOffline(true);
-        sendNotification('Você está offline', 'As tarefas adicionadas serão sincronizadas quando a conexão for restaurada.');
-      } else {
-        setIsOffline(false);
-        sendNotification('Você está online', 'A conexão foi restabelecida.');
-        loadTasks(); 
-      }
-    };
-
-    window.addEventListener('online', handleOfflineStatus);
-    window.addEventListener('offline', handleOfflineStatus);
-
-    return () => {
-      window.removeEventListener('online', handleOfflineStatus);
-      window.removeEventListener('offline', handleOfflineStatus);
-    };
-  }, []);
-
-
   const handleAddTask = async (e) => {
     e.preventDefault();
 
@@ -150,6 +125,41 @@ export default function Home() {
 };
 
   const groupedTasks = groupByDate(tasks);
+
+  useEffect(() => {
+    requestNotificationPermission();
+    loadTasks();
+
+    const handleOfflineStatus = () => {
+      if (!navigator.onLine) {
+        setIsOffline(true);
+        sendNotification('Você está offline', 'As tarefas adicionadas serão sincronizadas quando a conexão for restaurada.');
+      } else {
+        setIsOffline(false);
+        sendNotification('Você está online', 'A conexão foi restabelecida.');
+        loadTasks(); 
+      }
+    };
+
+    window.addEventListener('online', handleOfflineStatus);
+    window.addEventListener('offline', handleOfflineStatus);
+
+
+    const loadAnalytics = async () => {
+      await AnalyticsInit();
+    }
+
+    if(typeof window !== 'undefined'){
+      loadAnalytics();
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOfflineStatus);
+      window.removeEventListener('offline', handleOfflineStatus);
+    };
+  }, []);
+
+
 
   return (
     <PrivateRoute>
